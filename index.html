@@ -38,18 +38,35 @@ function precarga()
 
 function crea()
 {
-	//rect = this.add.rectangle(400, 225, 32, 32, 0xffffff); 
+//rect = this.add.rectangle(400, 225, 32, 32, 0xffffff); 
 	
 	flechas = this.input.keyboard.createCursorKeys();
 
+//Conjunto de marrones:
 	huevera_b = this.add.image(400, 160, 'huevera');
 	huevera_b.setScale(.5);
-	huevera_b.setTint(Phaser.Display.Color.GetColor(255, 0, 0));
+	huevera_b.setTint(Phaser.Display.Color.GetColor(192, 128, 16));
 
 	huevo_b = this.add.image(400, 256, 'huevo');
 	huevo_b.setScale(.5);
+	huevo_b.setTint(Phaser.Display.Color.GetColor(192, 128, 16));
+
+//Conjunto de verdes:
+	huevo_b = this.add.image(200, 160, 'huevera');
+	huevo_b.setScale(.5);
 	huevo_b.setTint(Phaser.Display.Color.GetColor(0, 255, 0));
 
+	huevo_b = this.add.image(200, 256, 'huevo');
+	huevo_b.setScale(.5);
+	huevo_b.setTint(Phaser.Display.Color.GetColor(0, 255, 0));
+
+//Conjunto de blancos:
+	huevo_b = this.add.image(600, 160, 'huevera');
+	huevo_b.setScale(.5);
+	
+	huevo_b = this.add.image(600, 256, 'huevo');
+	huevo_b.setScale(.5);
+	
 }
 
 function actualiza()
