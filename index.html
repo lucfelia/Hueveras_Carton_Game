@@ -22,30 +22,39 @@ let config = {
 let game = new Phaser.Game(config);
 
 let rect;
-let rect_dir = 5;
+let rect_dir = 4;
 let flechas;
 
-function precarga () {
-
+function precarga ()
+{
+	this.load.image('huevera', 'recursos/huevera.png');
 }
 
-function crea () {
+function crea ()
+{
 	rect = this.add.rectangle(400, 225, 32, 32, 0xffffff); 
 	
-	flechas = this.input.keyboard.createCursorKeys(); 
+	flechas = this.input.keyboard.createCursorKeys();
+
+	this.add.image(400, 160, 'huevera');
 }
 
-function actualiza () {
-	if(flechas.left.isDown) {
+function actualiza ()
+{
+	if(flechas.left.isDown)
+	{
 		rect.x -= rect_dir;
 	}
-	else if(flechas.right.isDown) {
+	else if(flechas.right.isDown)
+	{
 		rect.x += rect_dir;
 	}
-	if(flechas.up.isDown) {
+	if(flechas.up.isDown)
+	{
 		rect.y -= rect_dir;
 	}
-	else if(flechas.down.isDown) {
+	else if(flechas.down.isDown)
+	{
 		rect.y += rect_dir;
 	}
 	
