@@ -1,76 +1,63 @@
 <!DOCTYPE html>
 <html>
-    
+	<head>
+		<meta charset="UTF-8" />
+		<title>Hueveras de cartón 2</title>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.87.0/phaser.min.js"></script>
+		<script>
 
-<head>
-        <meta charset="UTF-8" />
-        <title>Hueveras de cartón 2</title>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.87.0/phaser.min.js"></script>
-    
-    <script>
 let canvas_w = 800;
-let canvas_h = 450;
+let canvas_y = 450;
 
 let config = {
-    width: canvas_w,
-    height: canvas_h,
-    scene: {
-        preload: precarga,
-        create: crea,
-        update: actualiza
-    }
-};
+	width: canvas_w,
+	height: canvas_y,
+	scene: {
+		preload: precarga,
+		create: crea,
+		update: actualiza
+		}
+	};
 
 let game = new Phaser.Game(config);
 
 let rect;
-let cursors;
-let dir = 4;
+let rect_dir = 5;
+let flechas;
 
-function precarga()
-{
-    
-}
-function crea()
-{
-    rect = this.add.rectangle(400, 225, 32, 32, 0xffffff);
-    
-    cursors = this.input.keyboard.createCursorKeys();
-}
-function actualiza()
-{
-    if (cursors.left.isDown)
-    {
-        rect.x -= dir;
-    }
-    else if (cursors.right.isDown)
-    {
-        rect.x += dir;
-    }
-    
-    if (cursors.up.isDown)
-    {
-        rect.y -= dir;
-    }
-    else if (cursors.down.isDown)
-    {
-        rect.y += dir;
-    }
+function precarga () {
 
+}
+
+function crea () {
+	rect = this.add.rectangle(400, 225, 32, 32, 0xffffff); 
+	
+	flechas = this.input.keyboard.createCursorKeys(); 
+}
+
+function actualiza () {
+	if(flechas.left.isDown) {
+		rect.x -= rect_dir;
+	}
+	else if(flechas.right.isDown) {
+		rect.x += rect_dir;
+	}
+	if(flechas.up.isDown) {
+		rect.y -= rect_dir;
+	}
+	else if(flechas.down.isDown) {
+		rect.y += rect_dir;
+	}
+	
 	if (rect.x < 0) rect.x = 0;
 	if (rect.x > canvas_w) rect.x = canvas_w;
 	if (rect.y < 0) rect.y = 0;
 	if (rect.y > canvas_y) rect.y = canvas_y;
-
+	
 }
-    </script>
-    
-</head>
-
-
-    <body>
-        
-    </body>
-
-
+		</script>
+	</head>
+	<body>
+		
+	</body>
 </html>
