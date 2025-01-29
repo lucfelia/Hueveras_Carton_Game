@@ -29,12 +29,13 @@ let flechas;
 
 let huevera_b, huevera_m, huevera_d;
 let huevo_b, huevo_m, huevo_d;
+let canvas_bg;
 
 function precarga()
 {
 	this.load.image('huevera', 'recursos/huevera.png');
 	this.load.image('huevo', 'recursos/huevo.png');
-	this.load.image('fondo', 'recursos/fondo.png');
+	this.load.image ('fondo', 'recursos/fondo.png');
 }
 
 function crea()
@@ -42,24 +43,24 @@ function crea()
 //rect = this.add.rectangle(400, 225, 32, 32, 0xffffff); 
 	
 	flechas = this.input.keyboard.createCursorKeys();
-	
-	// Fondo!
-		this.add.image(canvas_w/2, canvas_y/2, 'fondo');
-		
-	// Hueveras en la parte izquierda:
-		huevera_b = this.add.image(100, 100, 'huevera').setScale(0.75);
-		huevera_m = this.add.image(100, 225, 'huevera').setScale(0.75).setTint(Phaser.Display.Color.GetColor(192, 128, 16));
-		huevera_d = this.add.image(100, 350, 'huevera').setScale(0.75).setTint(Phaser.Display.Color.GetColor(255, 229, 122));
 
-	// Huevos en fila en la parte derecha:
+	//Fondo!
+		canvas_bg = this.add.image(canvas_w/2, canvas_y/2, 'fondo');
+		
+	//Hueveras en la parte izquierda:
+		huevera_b = this.add.image(140, 100, 'huevera').setScale(0.75);
+		huevera_m = this.add.image(140, 225, 'huevera').setScale(0.75).setTint(Phaser.Display.Color.GetColor(255, 128, 16));
+		huevera_d = this.add.image(140, 350, 'huevera').setScale(0.75).setTint(Phaser.Display.Color.GetColor(255, 229, 122));
+
+	//Huevos en fila en la parte derecha:
 		huevo_b = this.add.image(450, 225, 'huevo').setScale(1);
-		huevo_m = this.add.image(550, 225, 'huevo').setScale(1).setTint(Phaser.Display.Color.GetColor(192, 128, 16));
+		huevo_m = this.add.image(550, 225, 'huevo').setScale(1).setTint(Phaser.Display.Color.GetColor(255, 128, 16));
 		huevo_d = this.add.image(650, 225, 'huevo').setScale(1).setTint(Phaser.Display.Color.GetColor(255, 229, 122));
 
-	// Detectar clics en los huevos:
-		huevo_b.setInteractive();
-		huevo_m.setInteractive();
-		huevo_d.setInteractive();
+	//Detectar clics en los huevos:
+		huevo_b.setInteractive({draggable:true});
+		huevo_m.setInteractive({draggable:true});
+		huevo_d.setInteractive({draggable:true});
 
 		huevo_b.on('pointerdown', function ()
 		{ console.log("Huevo blanco clickado"); });
@@ -69,6 +70,11 @@ function crea()
 
 		huevo_d.on('pointerdown', function ()
 		{ console.log("Huevo dorado clickado"); });
+
+		this.input.on('drag', function (pointer, object, x, y) {
+		object.x = x;
+		object.y = y;	});
+
 }
 
 function actualiza()
