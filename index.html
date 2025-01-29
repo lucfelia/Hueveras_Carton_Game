@@ -35,7 +35,6 @@ function precarga()
 	this.load.image('huevera', 'recursos/huevera.png');
 	this.load.image('huevo', 'recursos/huevo.png');
 	this.load.image('fondo', 'recursos/fondo.png');
-	this.load.image('paja', 'recursos/paja.png');
 }
 
 function crea()
@@ -46,8 +45,7 @@ function crea()
 	
 	// Fondo!
 		this.add.image(canvas_w/2, canvas_y/2, 'fondo');
-		this.add.image(canvas_w/2, canvas_y/2, 'paja').setScale(1.225);
-
+		
 	// Hueveras en la parte izquierda:
 		huevera_b = this.add.image(100, 100, 'huevera').setScale(0.75);
 		huevera_m = this.add.image(100, 225, 'huevera').setScale(0.75).setTint(Phaser.Display.Color.GetColor(192, 128, 16));
