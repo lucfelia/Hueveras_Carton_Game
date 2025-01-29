@@ -35,6 +35,7 @@ function precarga()
 	this.load.image('huevera', 'recursos/huevera.png');
 	this.load.image('huevo', 'recursos/huevo.png');
 	this.load.image('fondo', 'recursos/fondo.png');
+	this.load.image('paja', 'recursos/paja.png');
 }
 
 function crea()
@@ -45,16 +46,17 @@ function crea()
 	
 	// Fondo!
 		this.add.image(canvas_w/2, canvas_y/2, 'fondo');
+		this.add.image(canvas_w/2, canvas_y/2, 'paja').setScale(1.225);
 
 	// Hueveras en la parte izquierda:
-		huevera_b = this.add.image(100, 100, 'huevera').setScale(.5);
-		huevera_m = this.add.image(100, 225, 'huevera').setScale(.5).setTint(Phaser.Display.Color.GetColor(192, 128, 16));
-		huevera_d = this.add.image(100, 350, 'huevera').setScale(.5).setTint(Phaser.Display.Color.GetColor(255, 229, 122));
+		huevera_b = this.add.image(100, 100, 'huevera').setScale(0.75);
+		huevera_m = this.add.image(100, 225, 'huevera').setScale(0.75).setTint(Phaser.Display.Color.GetColor(192, 128, 16));
+		huevera_d = this.add.image(100, 350, 'huevera').setScale(0.75).setTint(Phaser.Display.Color.GetColor(255, 229, 122));
 
 	// Huevos en fila en la parte derecha:
-		huevo_b = this.add.image(450, 225, 'huevo').setScale(.5);
-		huevo_m = this.add.image(550, 225, 'huevo').setScale(.5).setTint(Phaser.Display.Color.GetColor(192, 128, 16));
-		huevo_d = this.add.image(650, 225, 'huevo').setScale(.5).setTint(Phaser.Display.Color.GetColor(255, 229, 122));
+		huevo_b = this.add.image(450, 225, 'huevo').setScale(1);
+		huevo_m = this.add.image(550, 225, 'huevo').setScale(1).setTint(Phaser.Display.Color.GetColor(192, 128, 16));
+		huevo_d = this.add.image(650, 225, 'huevo').setScale(1).setTint(Phaser.Display.Color.GetColor(255, 229, 122));
 
 	// Detectar clics en los huevos:
 		huevo_b.setInteractive();
