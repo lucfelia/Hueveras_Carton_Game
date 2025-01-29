@@ -73,7 +73,15 @@ function crea()
 
 		this.input.on('drag', function (pointer, object, x, y) {
 		object.x = x;
-		object.y = y;	});
+		object.y = y;	
+		object.setScale(1.35);
+		if (Phaser.Geom.Intersects.RectangleToRectangle(huevera_m.getBounds(), object.getBounds())){
+		console.log("Huevo dentro de huevera!!");}
+		});
+		
+		this.input.on('dragend', function (pointer, object, x, y) {
+    object.setScale(1); });
+
 
 }
 
