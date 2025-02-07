@@ -23,26 +23,26 @@ let game = new Phaser.Game(config);
 let huevosFalling;
 let hueveras = [];
 
-let music = {
+/*let music = {
 	background: null,
 	game_over: null
-};
+};*/
 
 function precarga() {
   this.load.image('huevera', 'recursos/huevera.png');
 	this.load.image('huevo', 'recursos/huevo.png');
   this.load.image('fondo', 'recursos/fondo.png');
-	this.load.audio('background_music', 'audio/music_name.mp3')
+//	this.load.audio('background_music', 'audio/music_name.mp3')
 }
 
 function crea() {
 
-music.background = this.sound.add('background_music', {
+/*music.background = this.sound.add('background_music', {
 		loop: true,
 		volume: 0.5
 	});
 
-music.background.play();
+music.background.play();*/
 
 // Se añade la imagen de fondo centrada
 this.add.image(canvas_w / 2, canvas_y / 2, 'fondo');
