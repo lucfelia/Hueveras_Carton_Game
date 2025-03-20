@@ -1,135 +1,263 @@
 let canvas_w = 800;
-let canvas_y = 450;
-let contador; // Variable para el texto del contador
-let minuto = 60; // Valor inicial del contador
+let canvas_h = 450;
 
 let config = {
-	type: Phaser.AUTO,
-	width: canvas_w,
-	height: canvas_y,
-	physics: {
-		default: 'arcade',
-    arcade: { gravity: { y: 0 }, debug: false }
-           },
-  scene: {
-    preload: precarga,
-    create: crea,
-    update: actualiza
-         }
- };
+    width: canvas_w,
+    height: canvas_h,
+    scene: {
+        preload: precarga,
+        create: crea,
+        update: actualiza // Lógica del juego en cada fotograma
+    }
+};
 
+// Creación del juego
 let game = new Phaser.Game(config);
 
-let huevosFalling;
-let hueveras = [];
+let field_center = canvas_w / 2 + canvas_w / 8;
+let huevera_x = 128;
 
-/*let music = {
-	background: null,
-	game_over: null
-};*/
+let canvas_bg, eggcups_bg, huevera_b, huevera_m, huevera_d;
 
-function precarga() {
-  this.load.image('huevera', 'recursos/huevera.png');
-	this.load.image('huevo', 'recursos/huevo.png');
-  this.load.image('fondo', 'recursos/fondo.png');
-//	this.load.audio('background_music', 'audio/music_name.mp3')
+let huevo_shadow;
+
+let sprite_scale = 0.6;
+
+// Contadores
+let countdown = 20; // Tiempo inicial en segundos
+let countdown_text;
+let countdown_interval;
+let puntuacion = 0;
+let puntuacion_text;
+let juegoTerminado = false; // Loop principal
+
+let huevos = [];
+let huevos_speed = 1;
+
+let huevos_interval;
+let huevos_interval_time = 3000;
+
+let huevo_current = 0;
+
+// Música
+let music = {
+    background: null,
+    game_over: null
+};
+
+let fx = {
+    mouseclick: null,
+    bad: null,
+    good: null
+};
+
+
+// !!!!PRELOAD!!!!
+function precarga()
+{
+    this.load.image('grass_bg', 'imgs/grass_bg.png');
+    this.load.image('straw_bg', 'imgs/straw_bg.png');
+    this.load.image('huevera', 'imgs/huevera.png');
+    this.load.image('huevo', 'imgs/huevo.png');
+
+    this.load.audio('background_music', 'audio/apple_cider.mp3');
+    this.load.audio('game_over_music', 'audio/GameOver.mp3');
+    this.load.audio('mouseclick_fx', 'audio/mouseclick.mp3');
+    this.load.audio('good_fx', 'audio/good.mp3');
+    this.load.audio('bad_fx', 'audio/bad.mp3');
 }
 
-function crea() {
+// !!!!CREATE!!!!
+function crea()
+{
+    let blanco = Phaser.Display.Color.GetColor(255, 255, 255);
+    let marron = Phaser.Display.Color.GetColor(192, 128, 16);
+    let dorado = Phaser.Display.Color.GetColor(255, 215, 0);
 
-/*music.background = this.sound.add('background_music', {
-		loop: true,
-		volume: 0.5
-	});
+    // Fondo
+    canvas_bg = this.add.image(canvas_w / 2, canvas_h / 2, 'grass_bg');
 
-music.background.play();*/
+    // Creación de hueveras
+    huevera_d = this.add.image(huevera_x, canvas_h / 2 - 128, 'huevera')
+        .setScale(sprite_scale)
+        .setTint(dorado);
+    huevera_d.huevera_type = "d";
 
-// Se añade la imagen de fondo centrada
-this.add.image(canvas_w / 2, canvas_y / 2, 'fondo');
+    huevera_m = this.add.image(huevera_x, canvas_h / 2, 'huevera')
+        .setScale(sprite_scale)
+        .setTint(marron);
+    huevera_m.huevera_type = "m";
 
-// Crear hueveras y almacenarlas en un array (ubicadas en la parte izquierda)
-hueveras.push(this.add.image(140, 100, 'huevera').setScale(0.75));
-hueveras.push(this.add.image(140, 225, 'huevera').setScale(0.75).setTint(Phaser.Display.Color.GetColor(255, 128, 16)));
-hueveras.push(this.add.image(140, 350, 'huevera').setScale(0.75).setTint(Phaser.Display.Color.GetColor(255, 229, 122)));
+    huevera_b = this.add.image(huevera_x, canvas_h / 2 + 128, 'huevera')
+        .setScale(sprite_scale);
+    huevera_b.huevera_type = "b";
 
-// Se crea el grupo de huevos que caerán
-huevosFalling = this.physics.add.group();
+    // Sombra del huevo
+    huevo_shadow = this.add.image(-10000, -10000, 'huevo')
+        .setTint("#000000")
+        .setAlpha(0.5)
+        .setScale(1.3);
 
-// Se genera un huevo nuevo cada 1000ms (1 segundo)
-this.time.addEvent({
-	delay: 1000,
-  callback: generarHuevo,
-  callbackScope: this,
-  loop: true
- });
+    // Contadores
+    countdown_text = this.add.text(field_center, 16, `Tiempo: ${countdown}`, 
+        { fontSize: "24px", fontStyle: "bold" });
 
-// Eventos de arrastre: se permite mover el huevo y se cambia su escala al arrastrarlo
-this.input.on('drag', function (pointer, object, x, y) {
-  object.x = x;
-  object.y = y;
-  object.setScale(1.35);
- });
+    puntuacion_text = this.add.text(field_center, 50, `Puntuación: ${puntuacion}`, 
+        { fontSize: "24px", fontStyle: "bold" });
 
-// Al soltar el huevo, se verifica si está sobre alguna huevera y, en ese caso, se destruye
-this.input.on('dragend', function (pointer, object) {
-  object.setScale(1);
-  let sobreHuevera = false;
-  hueveras.forEach(huevera => {
-		if (Phaser.Geom.Intersects.RectangleToRectangle(huevera.getBounds(), object.getBounds())) {
-    	sobreHuevera = true;
-             }
- });
-    if (sobreHuevera) {
-      console.log("Huevo sobre huevera");
-      object.destroy();
-				              }
-});
+    // Música
+    music.background = this.sound.add('background_music', { loop: true, volume: 0.5 });
+    music.background.play();
+    music.game_over = this.sound.add('game_over_music');
 
-// Se crea el contador de cuenta atrás en la parte superior derecha.
-// Usamos setOrigin(1,0) para que el texto se alinee a la derecha, y aumentamos la fuente a 48px.
-contador = this.add.text(canvas_w - 20, 20, minuto, { font: "48px Arial", fill: "#fff" }).setOrigin(1, 0);
- }
+    fx.mouseclick = this.sound.add('mouseclick_fx');
+    fx.good = this.sound.add('good_fx');
+    fx.bad = this.sound.add('bad_fx');
 
-// Se usa setInterval para decrementar el contador cada 1000ms (1 segundo)
-let interval_contador = setInterval(function () {
-	minuto--;
-  if (minuto < 0) {
-  	clearInterval(interval_contador);
-    return;
-    					     }
-    contador.setText(minuto);
-		}, 1000);
+    // Generación de huevos
+    generarHuevos(this);
+}
 
-// Función para generar un huevo en una posición aleatoria en la parte superior y hacerlo caer
-function generarHuevo() {
-	let x = Phaser.Math.Between(300, 700);
-  let huevo = huevosFalling.create(x, 50, 'huevo').setScale(0.75);
+// !!!!GENERAR HUEVOS!!!!
+function generarHuevos(scene)
+{
+	// "Enciclopedia" con los colores y puntos
+    let colores = {
+        b: { color: Phaser.Display.Color.GetColor(255, 255, 255), puntos: 10 },
+        m: { color: Phaser.Display.Color.GetColor(192, 128, 16), puntos: 20 },
+        d: { color: Phaser.Display.Color.GetColor(255, 215, 0), puntos: 30 }
+    };
 
-  let colorRandom = Phaser.Math.Between(1, 3);
-  	if (colorRandom === 1) {
-    	huevo.setTint(Phaser.Display.Color.GetColor(255, 255, 255));
-      huevo.color = "blanco";
-    } else if (colorRandom === 2) {
-      huevo.setTint(Phaser.Display.Color.GetColor(255, 128, 16));
-      huevo.color = "marrón";
-    } else {
-      huevo.setTint(Phaser.Display.Color.GetColor(255, 229, 122));
-      huevo.color = "dorado";
-            }
+    // Bucle para crear 10 huevos
+    for (let i = 0; i < 10; i++) {
+        // Generar posición X aleatoria
+        let x = Phaser.Math.Between(field_center - 224, field_center + 224);
+        let y = -64; // Aparecen justo fuera de la pantalla
 
-      huevo.setVelocityY(100);
-      huevo.setInteractive({ draggable: true });
-      huevo.on('pointerdown', function () {
-      console.log(`Huevo ${this.color} clickado`);
-      });
+        // Crear el huevo y hacerlo interactivo
+        let huevo = scene.add.image(x, y, 'huevo').setInteractive({ draggable: true });
 
-	}
+        // Seleccionar un huevo aleatorio
+        let tipo = Object.keys(colores)[Phaser.Math.Between(0, 2)];
+        huevo.setTint(colores[tipo].color); // Aplicar color correspondiente
+        huevo.huevo_type = tipo;  // Guardar el tipo de huevo
+        huevo.puntos = colores[tipo].puntos;  // Asignar los puntos que vale este huevo
+        huevo.falling = true; // Indica que el huevo está cayendo
 
-// En la función update se eliminan los huevos que hayan caído fuera del canvas
-function actualiza() {
-	huevosFalling.children.iterate(function (huevo) {
-  if (huevo && huevo.y > canvas_y + 50) {
-  	huevo.destroy();
+        // Evento al hacer click
+        huevo.on('pointerdown', function () {
+            this.falling = false;  // Detenemos la caída del huevo al agarrarlo
+            huevo_shadow.setPosition(this.x + 8, this.y + 8);  // Mostramos la sombra
+            fx.mouseclick.play();  // Reproducimos el sonido de clic
+            this.setScale(1.3);  // Aumentamos el tamaño del huevo para dar feedback visual
+        });
+
+        // Añadir el huevo a la array
+        huevos.push(huevo);
     }
-  });
- }
+
+    // Evento global de arrastrar
+    game.input.on('drag', function (pointer, objeto, x, y) {
+        if (!juegoTerminado) {
+            objeto.x = x;
+            objeto.y = y;
+            huevo_shadow.setPosition(x + 8, y + 8);
+        }
+    });
+
+    // Evento al soltar
+    game.input.on('dragend', function (pointer, objeto) {
+        if (!juegoTerminado) {
+            objeto.setScale(1);  // Restauramos el tamaño
+            huevo_shadow.setPosition(-10000, -10000);  // Fuera sombra
+
+            let enHuevera = false; // Variable para saber si el huevo está en una huevera
+
+            // Comprobar si el huevo se suelta dentro de una huevera
+            [huevera_b, huevera_m, huevera_d].forEach(huevera => {
+                if (Phaser.Geom.Intersects.RectangleToRectangle(huevera.getBounds(), objeto.getBounds())) {
+                    enHuevera = true;
+
+                    // Si el huevo está bien, sumamos tiempo y puntos
+                    if (huevera.huevera_type === objeto.huevo_type) {
+                        countdown += 5;
+                        puntuacion += objeto.puntos;
+                        fx.good.play();  // Sonido de éxito
+                    } 
+                    // Si el huevo está en la huevera incorrecta, restamos tiempo y puntos
+                    else {
+                        countdown -= 5;
+                        puntuacion -= 10;
+                        fx.bad.play();  // Sonido de error
+                    }
+
+                    // Actualizamos los contadores
+                    countdown_text.setText(`Tiempo: ${countdown}`);
+                    puntuacion_text.setText(`Puntuación: ${puntuacion}`);
+
+                    // Eliminamos el huevo
+                    objeto.destroy();
+                }
+            });
+
+            // Si el huevo se cae restamos tiempo y puntos
+            if (!enHuevera) {
+                countdown -= 5;
+                puntuacion -= 5;
+                countdown_text.setText(`Tiempo: ${countdown}`);
+                puntuacion_text.setText(`Puntuación: ${puntuacion}`);
+                fx.bad.play();
+                objeto.destroy();
+            }
+        }
+    });
+}
+
+// !!!!ACTUALIZACIÓN DEL JUEGO!!!!
+function actualiza() {
+    if (juegoTerminado) return;  // Si el juego se acaba no se hace nada más
+
+    // Recorremos todos los huevos en juego
+    huevos.forEach(huevo => {
+        if (huevo.falling) {  // Si el huevo está cayendo
+            huevo.y += huevos_speed;  // Lo hacemos bajar
+
+            // Si el huevo cae fuera de la pantalla
+            if (huevo.y > canvas_h) {
+                huevo.falling = false; // Paramos su movimiento
+                countdown -= 5;  // Restamos tiempo
+                puntuacion -= 5;  // Restamos puntos
+                countdown_text.setText(`Tiempo: ${countdown}`);
+                puntuacion_text.setText(`Puntuación: ${puntuacion}`);
+                fx.bad.play(); // Sonido de fallo
+            }
+        }
+    });
+
+    // Si el tiempo llega a 0 termina el juego
+    if (countdown <= 0) {
+        finDelJuego(this);
+    }
+}
+
+
+// !!!!GAME OVER!!!!
+function finDelJuego(scene) {
+    juegoTerminado = true;
+
+    music.background.stop();
+    music.game_over.play();  // Sonido de Game Over
+
+    clearInterval(countdown_interval);
+
+    // Paramos todos los huevos
+    huevos.forEach(huevo => huevo.falling = false);
+
+    // Enseñamos GAME OVER en la pantalla
+    scene.add.text(canvas_w / 2 - 100, canvas_h / 2, "GAME OVER >:(", 
+        { fontSize: "48px", color: "#ff0000", fontStyle: "bold" });
+
+    // Puntuación final
+    scene.add.text(canvas_w / 2 - 100, canvas_h / 2 + 50, `Puntuación: ${puntuacion}`, 
+        { fontSize: "32px", color: "#ffffff" });
+}
