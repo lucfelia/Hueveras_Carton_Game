@@ -55,16 +55,15 @@ let fx = {
 // !!!!PRELOAD!!!!
 function precarga()
 {
-    this.load.image('grass_bg', 'imgs/grass_bg.png');
-    this.load.image('straw_bg', 'imgs/straw_bg.png');
-    this.load.image('huevera', 'imgs/huevera.png');
-    this.load.image('huevo', 'imgs/huevo.png');
+    this.load.image('fondo', 'recursos/fondo.png');
+    this.load.image('huevera', 'recursos/huevera.png');
+    this.load.image('huevo', 'recursos/huevo.png');
 
-    this.load.audio('background_music', 'audio/apple_cider.mp3');
-    this.load.audio('game_over_music', 'audio/GameOver.mp3');
-    this.load.audio('mouseclick_fx', 'audio/mouseclick.mp3');
-    this.load.audio('good_fx', 'audio/good.mp3');
-    this.load.audio('bad_fx', 'audio/bad.mp3');
+    this.load.audio('background_music', 'recursos/apple_cider.mp3');
+    this.load.audio('game_over_music', 'recursos/GameOver.mp3');
+    this.load.audio('mouseclick_fx', 'recursos/mouseclick.mp3');
+    this.load.audio('good_fx', 'recursos/good.mp3');
+    this.load.audio('bad_fx', 'recursos/bad.mp3');
 }
 
 // !!!!CREATE!!!!
@@ -75,7 +74,7 @@ function crea()
     let dorado = Phaser.Display.Color.GetColor(255, 215, 0);
 
     // Fondo
-    canvas_bg = this.add.image(canvas_w / 2, canvas_h / 2, 'grass_bg');
+    canvas_bg = this.add.image(canvas_w / 2, canvas_h / 2, 'fondo');
 
     // Creación de hueveras
     huevera_d = this.add.image(huevera_x, canvas_h / 2 - 128, 'huevera')
