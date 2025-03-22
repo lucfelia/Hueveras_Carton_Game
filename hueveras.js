@@ -59,8 +59,8 @@ function precarga()
     this.load.image('huevera', 'recursos/huevera.png');
     this.load.image('huevo', 'recursos/huevo.png');
 
-    this.load.audio('background_music', 'recursos/apple_cider.mp3');
-    this.load.audio('game_over_music', 'recursos/GameOver.mp3');
+    this.load.audio('background_music', 'recursos/dream.mp3');
+    this.load.audio('game_over_music', 'recursos/gameOver.mp3');
     this.load.audio('mouseclick_fx', 'recursos/mouseclick.mp3');
     this.load.audio('good_fx', 'recursos/good.mp3');
     this.load.audio('bad_fx', 'recursos/bad.mp3');
