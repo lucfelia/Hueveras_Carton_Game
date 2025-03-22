@@ -60,7 +60,7 @@ function precarga()
     this.load.image('huevo', 'recursos/huevo.png');
 
     this.load.audio('background_music', 'recursos/dream.mp3');
-    this.load.audio('game_over_music', 'recursos/gameOver.mp3');
+    this.load.audio('game_over_music', 'recursos/gameover.mp3');
     this.load.audio('mouseclick_fx', 'recursos/mouseclick.mp3');
     this.load.audio('good_fx', 'recursos/good.mp3');
     this.load.audio('bad_fx', 'recursos/bad.mp3');
@@ -115,11 +115,33 @@ function crea()
 
     // Generación de huevos
     generarHuevos(this);
+
+    // Llamada para generar huevos cada 3 segundos
+    this.time.addEvent({
+        delay: huevos_interval_time,
+        callback: function() {
+            generarHuevos(this);
+        },
+        loop: true // Para que los huevos se generen continuamente
+    });
+
+    // Generación del contador
+    countdown_interval = setInterval(() => {
+        if (!juegoTerminado) {
+            countdown -= 1;  // Reducir el tiempo en 1 segundo
+            countdown_text.setText(`Tiempo: ${countdown}`);
+            if (countdown <= 0) {
+                finDelJuego(this);  // Finaliza el juego cuando se acabe el tiempo
+            }
+        }
+    }, 1000);  // Ejecutar cada segundo
 }
 
 // !!!!GENERAR HUEVOS!!!!
 function generarHuevos(scene)
 {
+	console.log("Generando huevos..."); // DEBUG
+	
 	// "Enciclopedia" con los colores y puntos
     let colores = {
         b: { color: Phaser.Display.Color.GetColor(255, 255, 255), puntos: 10 },
@@ -156,7 +178,7 @@ function generarHuevos(scene)
     }
 
     // Evento global de arrastrar
-    game.input.on('drag', function (pointer, objeto, x, y) {
+    scene.input.on('drag', function (pointer, objeto, x, y) {
         if (!juegoTerminado) {
             objeto.x = x;
             objeto.y = y;
@@ -165,7 +187,7 @@ function generarHuevos(scene)
     });
 
     // Evento al soltar
-    game.input.on('dragend', function (pointer, objeto) {
+    scene.input.on('dragend', function (pointer, objeto) {
         if (!juegoTerminado) {
             objeto.setScale(1);  // Restauramos el tamaño
             huevo_shadow.setPosition(-10000, -10000);  // Fuera sombra
@@ -196,6 +218,8 @@ function generarHuevos(scene)
 
                     // Eliminamos el huevo
                     objeto.destroy();
+                    // Eliminar huevo del arreglo
+                    huevos = huevos.filter(huevo => huevo !== objeto);
                 }
             });
 
@@ -207,6 +231,8 @@ function generarHuevos(scene)
                 puntuacion_text.setText(`Puntuación: ${puntuacion}`);
                 fx.bad.play();
                 objeto.destroy();
+                // Eliminar huevo del arreglo
+                huevos = huevos.filter(huevo => huevo !== objeto);
             }
         }
     });
@@ -215,7 +241,8 @@ function generarHuevos(scene)
 // !!!!ACTUALIZACIÓN DEL JUEGO!!!!
 function actualiza() {
     if (juegoTerminado) return;  // Si el juego se acaba no se hace nada más
-
+	console.log("Actualizando juego..."); // DEBUG
+	
     // Recorremos todos los huevos en juego
     huevos.forEach(huevo => {
         if (huevo.falling) {  // Si el huevo está cayendo
@@ -229,6 +256,9 @@ function actualiza() {
                 countdown_text.setText(`Tiempo: ${countdown}`);
                 puntuacion_text.setText(`Puntuación: ${puntuacion}`);
                 fx.bad.play(); // Sonido de fallo
+                huevo.destroy();
+                // Eliminar huevo del arreglo
+                huevos = huevos.filter(h => h !== huevo);
             }
         }
     });
@@ -239,7 +269,6 @@ function actualiza() {
     }
 }
 
-
 // !!!!GAME OVER!!!!
 function finDelJuego(scene) {
     juegoTerminado = true;
@@ -247,16 +276,10 @@ function finDelJuego(scene) {
     music.background.stop();
     music.game_over.play();  // Sonido de Game Over
 
-    clearInterval(countdown_interval);
+    clearInterval(countdown_interval);  // Detener el contador de tiempo
 
-    // Paramos todos los huevos
-    huevos.forEach(huevo => huevo.falling = false);
-
-    // Enseñamos GAME OVER en la pantalla
-    scene.add.text(canvas_w / 2 - 100, canvas_h / 2, "GAME OVER >:(", 
-        { fontSize: "48px", color: "#ff0000", fontStyle: "bold" });
-
-    // Puntuación final
-    scene.add.text(canvas_w / 2 - 100, canvas_h / 2 + 50, `Puntuación: ${puntuacion}`, 
-        { fontSize: "32px", color: "#ffffff" });
+    scene.add.text(field_center, canvas_h / 2, `¡Fin del juego!`, 
+        { fontSize: "40px", fontStyle: "bold", fill: "#ff0000" });
+    scene.add.text(field_center, canvas_h / 2 + 40, `Puntuación final: ${puntuacion}`, 
+        { fontSize: "24px", fontStyle: "bold" });
 }
